@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+	<!-- <constant name="struts.objectFactory" value="spring"></constant> -->
+	<!-- <constant name = "struts.i18n.encoding" value = "UTF-8" /> -->
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <constant name="struts.devMode" value="false" />
+
+    <package name="default" namespace="/" extends="struts-default">
+    	<interceptors>
+    		<interceptor name="privilegeInteceptor" class="cn.itcast.shop.inteceptor.PrivilegeInteceptor"/>
+    	</interceptors>
+    	
+    	<global-results>
+    		<result name="msg">/WEB-INF/jsp/msg.jsp</result>
+    		<result name="loginPage">/WEB-INF/jsp/login.jsp</result>
+    		<result name="loginError">/admin/index.jsp</result>
+    	</global-results>
+		
+		<!-- 这里需要注意的是，action即可由struts框架来创建，也可由spring容器来注入（可选的），当使用spring来注入的时候，
+		此处的action的class属性必须和spring配置的id属性相对应。 -->
+        <action name="index" class="indexAction">
+            <result name="index">/WEB-INF/jsp/index.jsp</result>
+        </action>
+        
+        <action name="user_*" class="userAction" method="{1}">
+        	<result name="registPage">/WEB-INF/jsp/regist.jsp</result>
+        	<result name="input">/WEB-INF/jsp/regist.jsp</result>
+        	
+        	<result name="loginError">/WEB-INF/jsp/login.jsp</result>
+        	<result name="loginSuccess" type="redirectAction">index</result>
+        	<result name="quit" type="redirectAction">index</result>
+        	<result name="codeError">/WEB-INF/jsp/login.jsp</result>
+        </action>
+        
+        <action name="checkImg" class="checkImgAction"></action>
+        
+        <action name="product_*" class="productAction" method="{1}">
+        	<result name="productInfo">/WEB-INF/jsp/product.jsp</result>
+        	<result name="allProduct">/WEB-INF/jsp/productList.jsp</result>
+        	<result name="categorysecondProduct">/WEB-INF/jsp/productList.jsp</result>
+        	
+        </action>
+        
+        <action name="cart_*" class="cartAction" method="{1}">
+        	<result name="addCart">/WEB-INF/jsp/cart.jsp</result>
+        	<result name="clearCart">/WEB-INF/jsp/cart.jsp</result>
+        	<result name="removeCart">/WEB-INF/jsp/cart.jsp</result>
+        	<result name="goCart">/WEB-INF/jsp/cart.jsp</result>
+        </action>
+        
+        <action name="order_*" class="orderAction" method="{1}">
+        	<result name="saveOrder">/WEB-INF/jsp/order.jsp</result>
+        	<result name="myOrder">/WEB-INF/jsp/orderList.jsp</result>
+        	<result name="findByOid">/WEB-INF/jsp/order.jsp</result>
+        	<result name="updateState" type="redirectAction">order_findByUid.action?page=1</result>
+        </action>
+        
+        <action name="admin_*" class="adminAction" method="{1}">
+        	<result name="loginFail">/admin/index.jsp</result>
+        	<result name="loginSuccess" type="redirect">/admin/home.jsp</result>
+        	
+        </action>
+        
+        <action name="admincategory_*" class="adminCategoryAction" method="{1}">
+        	<result name="categoryList">/admin/category/list.jsp</result>
+        	<result name="saveSuccess" type="redirectAction">admincategory_findAll.action</result>
+        	<result name="deleteSuccess" type="redirectAction">admincategory_findAll.action</result>
+        	<result name="edit">/admin/category/edit.jsp</result>
+        	<result name="updateSuccess" type="redirectAction">admincategory_findAll.action</result>
+        	<interceptor-ref name="privilegeInteceptor"/>
+        	<interceptor-ref name="defaultStack"/>
+        </action>
+        
+        <action name="adminsecond_*" class="adminSecondAction" method="{1}">
+        	<result name="findAll">/admin/categorysecond/list.jsp</result>
+        	<result name="addPage">/admin/categorysecond/add.jsp</result>
+        	<result name="editSuccess">/admin/categorysecond/edit.jsp</result>
+        	<result name="store" type="redirectAction">adminsecond_findAll.action?page=1</result>
+        	<result name="deleteSuccess" type="redirectAction">adminsecond_findAll.action?page=1</result>
+        	<result name="updateSuccess" type="redirectAction">adminsecond_findAll.action?page=1</result>
+        	<interceptor-ref name="privilegeInteceptor"/>
+        	<interceptor-ref name="defaultStack"/>
+        </action>
+        
+        <action name="adminproduct_*" class="adminProductAction" method="{1}">
+        	<result name="findAll">/admin/product/list.jsp</result>
+        	<result name="addPage">/admin/product/add.jsp</result>
+        	<result name="saveProduct" type="redirectAction">adminproduct_findAll.action?page=1</result>
+        	<result name="deleteProduct" type="redirectAction">adminproduct_findAll.action?page=1</result>
+        	<result name="editSuccess">/admin/product/edit.jsp</result>
+        	<result name="updateSuccess" type="redirectAction">adminproduct_findAll.action?page=1</result>
+        	<interceptor-ref name="privilegeInteceptor"/>
+        	<interceptor-ref name="defaultStack"/>
+        </action>
+        
+        <action name="adminorder_*" class="adminOrderAction" method="{1}">
+        	<result name="findAllOrder">/admin/order/list.jsp</result>
+        	<result name="findOrderItem">/admin/order/orderItem.jsp</result>
+        	<result name="updateState" type="redirectAction">adminorder_findAll.action?page=1</result>
+        	<interceptor-ref name="privilegeInteceptor"/>
+        	<interceptor-ref name="defaultStack"/>
+        </action>
+        
+    </package>
+
+
+</struts>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+	<context:annotation-config />
+	<context:component-scan base-package="cn.itcast.shop" />
+ 
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+	    <property name="driverClassName" value="${jdbc.driverClassName}"/>
+	    <property name="url" value="${jdbc.url}"/>
+	    <property name="username" value="${jdbc.username}"/>
+	    <property name="password" value="${jdbc.password}"/>
+	</bean>
+
+	<context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="annotatedClasses">
+            <list>
+                <value>cn.itcast.shop.user.model.User</value>
+                <value>cn.itcast.shop.category.model.Category</value>
+                <value>cn.itcast.shop.product.model.Product</value>
+                <value>cn.itcast.shop.categorysecond.model.CategorySecond</value>
+                <value>cn.itcast.shop.order.model.Order</value>
+                <value>cn.itcast.shop.order.model.OrderItem</value>
+                <value>cn.itcast.shop.adminuser.model.AdminUser</value>
+            </list>
+        </property>
+         <!--<property name="packagesToScan">
+            <list>
+                <value>com.buaa.model</value>
+            </list>
+        </property> -->
+        <property name="hibernateProperties">
+        	<props>
+        		<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+        		<prop key="hibernate.show_sql">true</prop>
+        		<prop key="hibernate.format_sql">true</prop>
+        		<prop key="hibernate.hbm2ddl.auto">update</prop>
+        	</props>
+        </property>
+    </bean>
+ 	
+ 	<!-- 使用HibernateTemplate来封装持久化操作，简化DAO层的代码 -->
+    <bean id="hibernateTemplate" class="org.springframework.orm.hibernate4.HibernateTemplate">
+    	<property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+    
+    <bean id="txManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+    	<property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    
+ 
+    <!-- 使用注解来管理事务
+    	<tx:annotation-driven transaction-manager="txManager" /> -->
+    	
+    
+ 	<tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="find*" propagation="REQUIRED"/>
+            <tx:method name="add*" propagation="REQUIRED"/>
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+        </tx:attributes>
+    </tx:advice>
+    
+	<!-- 使用切面来管理事务 -->
+	<aop:config>
+		<aop:pointcut expression="execution(public * cn.itcast.shop.user.service.impl.*.*(..))" 
+		id="userServiceMethods"/>
+		<aop:pointcut expression="execution(public * cn.itcast.shop.category.service.impl.*.*(..))" 
+		id="categoryServiceMethods"/>
+		<aop:pointcut expression="execution(public * cn.itcast.shop.product.service.impl.*.*(..))" 
+		id="productServiceMethods"/>
+		<aop:pointcut expression="execution(public * cn.itcast.shop.categorysecond.service.impl.*.*(..))" 
+		id="categorySecondServiceMethods"/>
+		<aop:pointcut expression="execution(public * cn.itcast.shop.order.service.impl.*.*(..))" 
+		id="orderServiceMethods"/>
+		<aop:pointcut expression="execution(public * cn.itcast.shop.adminuser.service.impl.*.*(..))" 
+		id="adminuserServiceMethods"/>
+		<aop:advisor pointcut-ref="userServiceMethods" advice-ref="txAdvice"/>
+		<aop:advisor pointcut-ref="categoryServiceMethods" advice-ref="txAdvice"/>
+		<aop:advisor pointcut-ref="productServiceMethods" advice-ref="txAdvice"/>
+		<aop:advisor pointcut-ref="categorySecondServiceMethods" advice-ref="txAdvice"/>
+		<aop:advisor pointcut-ref="orderServiceMethods" advice-ref="txAdvice"/>
+		<aop:advisor pointcut-ref="adminuserServiceMethods" advice-ref="txAdvice"/>
+	</aop:config>
+    
+</beans>
